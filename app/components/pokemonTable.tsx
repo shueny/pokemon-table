@@ -113,14 +113,14 @@ export default function PokemonTable({
       </form>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
+      <div className="overflow-x-auto rounded-xl shadow border border-gray-200 bg-white">
+        <table className="min-w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <tr key={headerGroup.id} className="border-b border-gray-200">
                 {headerGroup.headers.map((header) => (
                   <th
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200 bg-gray-50"
+                    className="px-6 py-3 text-left text-sm font-bold text-gray-600 bg-gray-50"
                     key={header.id}
                   >
                     {flexRender(
@@ -136,7 +136,7 @@ export default function PokemonTable({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
+                className="hover:bg-gray-50 transition-colors"
                 onClick={() => handleRowClick(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -155,38 +155,73 @@ export default function PokemonTable({
 
       {/* Pagination */}
       {!filterName && (
-        <div className="flex items-center gap-2 mt-6 justify-end">
-          {pageNumbers.map((num, idx) => {
-            const href = `/?page=${num}${search ? `&name=${search}` : ''}`
-
-            if (num === 1 || num === pageCount || Math.abs(num - page) <= 1) {
-              return (
-                <Link
-                  key={num}
-                  href={href}
-                  className={`px-3 py-1 rounded border mx-0.5 ${
-                    num === page
-                      ? 'bg-indigo-500 text-white border-indigo-500'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                  }`}
-                >
-                  {num}
-                </Link>
-              )
-            }
-
-            if (
-              (num === page - 2 && num > 1) ||
-              (num === page + 2 && num < pageCount)
-            ) {
-              return (
-                <span key={num} className="px-2 text-gray-400 select-none">
-                  ...
-                </span>
-              )
-            }
-            return null
-          })}
+        <div className="flex items-center justify-between mt-6 px-2">
+          {/* Previous */}
+          <Link
+            href={`/?page=${Math.max(page - 1, 1)}${
+              search ? `&name=${search}` : ''
+            }`}
+            className={`px-6 py-2 border-2 border-gray-300 rounded-lg font-bold uppercase text-sm mr-2 transition ${
+              page === 1
+                ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+            aria-disabled={page === 1}
+            tabIndex={page === 1 ? -1 : 0}
+          >
+            Previous
+          </Link>
+          {/* Page Numbers */}
+          <div className="flex items-center gap-2">
+            {pageNumbers.map((num, idx) => {
+              // 只顯示: 第一頁、最後一頁、當前頁、當前頁前後各一頁
+              if (num === 1 || num === pageCount || Math.abs(num - page) <= 1) {
+                return (
+                  <Link
+                    key={`${idx}-${num}`}
+                    href={`/?page=${num}${search ? `&name=${search}` : ''}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg text-base font-medium transition ${
+                      num === page
+                        ? 'font-bold bg-[#1a7bbd] text-white'
+                        : 'bg-white text-gray-700 hover:border-black'
+                    }`}
+                  >
+                    {num}
+                  </Link>
+                )
+              }
+              // 省略號
+              if (
+                (num === page - 2 && num > 1) ||
+                (num === page + 2 && num < pageCount)
+              ) {
+                return (
+                  <span
+                    key={num}
+                    className="w-10 h-10 flex items-center justify-center text-gray-400 select-none"
+                  >
+                    ...
+                  </span>
+                )
+              }
+              return null
+            })}
+          </div>
+          {/* Next */}
+          <Link
+            href={`/?page=${Math.min(page + 1, pageCount)}${
+              search ? `&name=${search}` : ''
+            }`}
+            className={`px-6 py-2 border-2 border-gray-300 rounded-lg font-bold uppercase text-sm ml-2 transition ${
+              page === pageCount
+                ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+            aria-disabled={page === pageCount}
+            tabIndex={page === pageCount ? -1 : 0}
+          >
+            Next
+          </Link>
         </div>
       )}
 
