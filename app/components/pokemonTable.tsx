@@ -99,13 +99,13 @@ export default function PokemonTable({
       <form method="GET" className="mb-4 flex gap-2">
         <input
           name="name"
-          className="border px-3 py-2 rounded w-60"
+          className="border px-3 py-2 rounded-xl w-60"
           placeholder="Filter by name"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <button
-          className="px-4 py-2 bg-indigo-500 text-white rounded"
+          className="px-4 py-2 bg-[#1a7bbd] text-white rounded-xl"
           type="submit"
         >
           Search

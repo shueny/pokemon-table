@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import PokemonTable from './components/pokemonTable'
+import PokemonTable from './components/PokemonTable'
 
 type SearchParams = {
   page?: string
@@ -49,7 +49,6 @@ export default async function Page({
 
   return (
     <div className="max-w-3xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Pokémon List</h1>
       <PokemonTable
         pokemons={pokemons}
         page={page}
