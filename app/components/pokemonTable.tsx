@@ -10,20 +10,9 @@ import {
 } from '@tanstack/react-table'
 import Image from 'next/image'
 import Modal from './Modal'
+import { useSearchStore } from './types'
 
 type Pokemon = { name: string; url: string }
-type PokemonType = { type: { name: string } }
-
-type PokemonDetail = {
-  id: number
-  abilities: { ability: { name: string } }[]
-  base_experience: number
-  name: string
-  height: number
-  weight: number
-  sprites: { front_default: string }
-  types: { type: { name: string } }[]
-}
 
 const columns: ColumnDef<Pokemon>[] = [
   {
@@ -56,16 +45,23 @@ export default function PokemonTable({
   total,
   filterName,
 }: {
-  pokemons: Pokemon[]
+  pokemons: { name: string; url: string }[]
   page: number
   pageSize: number
   total: number
   filterName: string
 }) {
-  const [modalData, setModalData] = React.useState<PokemonDetail | null>(null)
-  const [modalOpen, setModalOpen] = React.useState(false)
-  const [loading, setLoading] = React.useState(false)
-  const [modalTitle, setModalTitle] = React.useState('')
+  const {
+    modalOpen,
+    modalData,
+    modalTitle,
+    modalLoading,
+    setModalOpen,
+    setModalData,
+    setModalTitle,
+    setModalLoading,
+    resetModal,
+  } = useSearchStore()
 
   // Pagination
   const pageCount = Math.ceil(total / pageSize)
@@ -81,18 +77,17 @@ export default function PokemonTable({
   })
 
   // Modal
-  const handleRowClick = async (pokemon: Pokemon) => {
-    setLoading(true)
+  const handleRowClick = async (pokemon: { name: string; url: string }) => {
+    setModalLoading(true)
     setModalOpen(true)
     setModalTitle(pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1))
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`)
-
     if (res.ok) {
       setModalData(await res.json())
     } else {
       setModalData(null)
     }
-    setLoading(false)
+    setModalLoading(false)
   }
 
   function getStars(baseExp: number) {
@@ -213,12 +208,8 @@ export default function PokemonTable({
       )}
 
       {/* Modal */}
-      <Modal
-        open={modalOpen}
-        title={modalTitle}
-        onCancel={() => setModalOpen(false)}
-      >
-        {loading ? (
+      <Modal open={modalOpen} title={modalTitle} onCancel={resetModal}>
+        {modalLoading ? (
           <div>Loading...</div>
         ) : modalData ? (
           <div className="flex flex-col items-center text-center p-4">
@@ -241,12 +232,14 @@ export default function PokemonTable({
             {/* Tag */}
             <div className="text-xs text-gray-500 font-semibold mb-2">
               #{modalData.id} &nbsp;|&nbsp;{' '}
-              {modalData.types.map((t: PokemonType) => t.type.name).join(' / ')}
+              {modalData.types
+                .map((t: { type: { name: string } }) => t.type.name)
+                .join(' / ')}
             </div>
             {/* Introduction */}
             <div className="text-gray-700 text-sm italic mb-2">
               {`This Pokémon is a ${modalData.types
-                .map((t: PokemonType) => t.type.name)
+                .map((t: { type: { name: string } }) => t.type.name)
                 .join('/')} type. 
               It has base experience ${modalData.base_experience}, height ${
                 modalData.height

@@ -3,6 +3,7 @@ import React from 'react'
 import SearchBar from './SearchBar'
 import PokemonTable from './PokemonTable'
 import EvolutionTable from './EvolutionTable'
+import { useSearchStore } from './types'
 
 export default function PokemonPage({
   initialPokemons,
@@ -15,21 +16,28 @@ export default function PokemonPage({
   pageSize: number
   total: number
 }) {
-  const [search, setSearch] = React.useState('')
-  const [pokemons, setPokemons] = React.useState(initialPokemons)
-  const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
+  const {
+    search,
+    pokemons,
+    loading,
+    error,
+    setSearch,
+    setPokemons,
+    setLoading,
+    setError,
+    reset,
+  } = useSearchStore()
 
   // Reset pokemons when initialPokemons changes
   React.useEffect(() => {
-    setPokemons(initialPokemons)
+    reset(initialPokemons)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPokemons])
 
   // Search handler
   const handleSearch = async () => {
     if (!search) {
-      setPokemons(initialPokemons)
-      setError(null)
+      reset(initialPokemons)
       return
     }
     setLoading(true)
@@ -59,9 +67,7 @@ export default function PokemonPage({
 
   // Clear handler
   const handleClear = () => {
-    setSearch('')
-    setPokemons(initialPokemons)
-    setError(null)
+    reset(initialPokemons)
   }
 
   return (
