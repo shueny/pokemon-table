@@ -2,6 +2,7 @@
 import React from 'react'
 import SearchBar from './SearchBar'
 import PokemonTable from './PokemonTable'
+import EvolutionTable from './EvolutionTable'
 
 export default function PokemonPage({
   initialPokemons,
@@ -82,6 +83,8 @@ export default function PokemonPage({
           filterName={search}
         />
       )}
+      <div className="h-[1px] bg-gray-200 my-4 mt-8 w-full" />
+      <EvolutionTable />
     </div>
   )
 }
