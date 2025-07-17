@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pokemon Table (Next.js)
+
+A modern, responsive web app to browse, search, and explore Pokémon data, built with [Next.js](https://nextjs.org), [React](https://react.dev), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/), and [@tanstack/react-table](https://tanstack.com/table/v8). Data is fetched live from the [PokeAPI](https://pokeapi.co/).
+
+![Pokemon List Screenshot](public/pokemon.webp)
+
+---
+
+## Features
+
+- **Paginated Pokémon Table**: Browse Pokémon with pagination and ability details.
+- **Search**: Search Pokémon by name with instant results.
+- **Detail Modal**: Click a Pokémon to view detailed info (image, types, abilities, stats) in a modal.
+- **Evolution Triggers Table**: View and paginate through evolution triggers from the API.
+- **Responsive UI**: Clean, mobile-friendly design using Tailwind CSS.
+- **Server-Side Rendering**: Fast initial load and SEO-friendly.
+- **Centralized State Management**: Uses Zustand for managing search, modal, and Pokémon state.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- npm, yarn, pnpm, or bun
+
+### Setup
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   # or
+   bun install
+   ```
+2. **Run the development server:**
+   ```bash
+   npm run dev
+   # or yarn dev, pnpm dev, bun dev
+   ```
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Build for Production
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+  components/      # Reusable React components and types
+    Header.tsx         # App header with logo
+    SearchBar.tsx      # Search input for Pokémon
+    PokemonTable.tsx   # Main table with pagination and modal
+    EvolutionTable.tsx # Table for evolution triggers
+    Modal.tsx          # Generic modal dialog
+    PokemonPage.tsx    # Page container for table/search/evolution
+    types.ts           # Shared TypeScript types and Zustand store
+  styles/
+    globals.css    # Tailwind and global styles
+  layout.tsx       # App layout and font setup
+  page.tsx         # Main page, SSR entry point
+public/            # Static assets (e.g., pokemon.webp logo)
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Design Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **TypeScript**: Strict typing for safety and maintainability. Shared types and the Zustand store are defined in `app/components/types.ts`.
+- **Zustand State Management**: All search, modal, and Pokémon state is managed centrally using Zustand, making the codebase more maintainable and scalable.
+- **React Table**: Efficient, flexible table rendering and pagination.
+- **Tailwind CSS**: Utility-first styling for rapid UI development.
+- **Next.js SSR**: Server-side data fetching for fast, SEO-friendly pages.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Linting & Formatting
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- ESLint is set up for Next.js and TypeScript: `npm run lint`
+- Follows Next.js and core web vitals best practices.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Future Improvements
+
+### Features & UX
+
+- Add Pokémon type filters and sorting.
+- Add more detailed Pokémon info (stats, moves, evolutions, etc.).
+- Add user favorites/bookmarks (using Zustand for state).
+- Improve error handling and loading states.
+- Add dark mode toggle.
+- Add accessibility improvements (a11y).
+
+### Code & Design
+
+- Further modularize Zustand store for larger state needs.
+- Extract API logic to a separate utility/service layer.
+- Add custom hooks for data fetching and caching.
+- Modularize components further for reusability.
+
+### Testing
+
+- **Unit Tests**: Add tests for components and Zustand store using [Jest](https://jestjs.io/) and [React Testing Library](https://testing-library.com/).
+- **Integration/E2E Tests**: Add [Cypress](https://www.cypress.io/) or [Playwright](https://playwright.dev/) for end-to-end testing.
+- Example test structure:
+  ```
+  __tests__/
+    PokemonTable.test.tsx
+    EvolutionTable.test.tsx
+    types.test.ts
+  ```
+- Add GitHub Actions or similar CI for automated testing and linting.
+
+### Documentation
+
+- Add more usage examples and screenshots.
+- Document API endpoints and data structures.
+- Document Zustand state structure and usage.
+
+---
+
+## Contributing
+
+Pull requests and issues are welcome! Please open an issue to discuss your idea before submitting a PR.
