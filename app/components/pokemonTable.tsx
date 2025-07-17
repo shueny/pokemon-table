@@ -9,11 +9,15 @@ import {
   ColumnDef,
 } from '@tanstack/react-table'
 import Image from 'next/image'
+import Modal from './Modal'
 
 type Pokemon = { name: string; url: string }
 type PokemonType = { type: { name: string } }
 
 type PokemonDetail = {
+  id: number
+  abilities: { ability: { name: string } }[]
+  base_experience: number
   name: string
   height: number
   weight: number
@@ -23,10 +27,6 @@ type PokemonDetail = {
 
 const columns: ColumnDef<Pokemon>[] = [
   {
-    header: '#',
-    cell: ({ row }) => row.index + 1,
-  },
-  {
     accessorKey: 'name',
     header: 'Name',
     cell: (info) => (
@@ -35,7 +35,7 @@ const columns: ColumnDef<Pokemon>[] = [
   },
   {
     accessorKey: 'url',
-    header: 'URL',
+    header: 'Ability Detail Data',
     cell: (info) => (
       <a
         href={info.getValue() as string}
@@ -65,7 +65,7 @@ export default function PokemonTable({
   const [modalData, setModalData] = React.useState<PokemonDetail | null>(null)
   const [modalOpen, setModalOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
-  const [search, setSearch] = React.useState(filterName)
+  const [modalTitle, setModalTitle] = React.useState('')
 
   // Pagination
   const pageCount = Math.ceil(total / pageSize)
@@ -84,7 +84,9 @@ export default function PokemonTable({
   const handleRowClick = async (pokemon: Pokemon) => {
     setLoading(true)
     setModalOpen(true)
+    setModalTitle(pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1))
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`)
+
     if (res.ok) {
       setModalData(await res.json())
     } else {
@@ -93,25 +95,16 @@ export default function PokemonTable({
     setLoading(false)
   }
 
+  function getStars(baseExp: number) {
+    if (baseExp >= 200) return 5
+    if (baseExp >= 150) return 4
+    if (baseExp >= 100) return 3
+    if (baseExp >= 50) return 2
+    return 1
+  }
+
   return (
     <div>
-      {/* Search */}
-      <form method="GET" className="mb-4 flex gap-2">
-        <input
-          name="name"
-          className="border px-3 py-2 rounded-xl w-60"
-          placeholder="Filter by name"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button
-          className="px-4 py-2 bg-[#1a7bbd] text-white rounded-xl"
-          type="submit"
-        >
-          Search
-        </button>
-      </form>
-
       {/* Table */}
       <div className="overflow-x-auto rounded-xl shadow border border-gray-200 bg-white">
         <table className="min-w-full">
@@ -158,9 +151,7 @@ export default function PokemonTable({
         <div className="flex items-center justify-between mt-6 px-2">
           {/* Previous */}
           <Link
-            href={`/?page=${Math.max(page - 1, 1)}${
-              search ? `&name=${search}` : ''
-            }`}
+            href={`/?page=${Math.max(page - 1, 1)}`}
             className={`px-6 py-2 border-2 border-gray-300 rounded-lg font-bold uppercase text-sm mr-2 transition ${
               page === 1
                 ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400'
@@ -174,12 +165,11 @@ export default function PokemonTable({
           {/* Page Numbers */}
           <div className="flex items-center gap-2">
             {pageNumbers.map((num, idx) => {
-              // 只顯示: 第一頁、最後一頁、當前頁、當前頁前後各一頁
               if (num === 1 || num === pageCount || Math.abs(num - page) <= 1) {
                 return (
                   <Link
                     key={`${idx}-${num}`}
-                    href={`/?page=${num}${search ? `&name=${search}` : ''}`}
+                    href={`/?page=${num}`}
                     className={`w-10 h-10 flex items-center justify-center rounded-lg text-base font-medium transition ${
                       num === page
                         ? 'font-bold bg-[#1a7bbd] text-white'
@@ -190,7 +180,6 @@ export default function PokemonTable({
                   </Link>
                 )
               }
-              // 省略號
               if (
                 (num === page - 2 && num > 1) ||
                 (num === page + 2 && num < pageCount)
@@ -209,9 +198,7 @@ export default function PokemonTable({
           </div>
           {/* Next */}
           <Link
-            href={`/?page=${Math.min(page + 1, pageCount)}${
-              search ? `&name=${search}` : ''
-            }`}
+            href={`/?page=${Math.min(page + 1, pageCount)}`}
             className={`px-6 py-2 border-2 border-gray-300 rounded-lg font-bold uppercase text-sm ml-2 transition ${
               page === pageCount
                 ? 'pointer-events-none opacity-50 bg-gray-100 text-gray-400'
@@ -226,49 +213,57 @@ export default function PokemonTable({
       )}
 
       {/* Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 min-w-[320px] relative">
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
-              onClick={() => setModalOpen(false)}
-            >
-              ✕
-            </button>
-            {loading ? (
-              <div>Loading...</div>
-            ) : modalData ? (
-              <div>
-                <h2 className="text-xl font-bold mb-2 capitalize">
-                  {modalData.name}
-                </h2>
-                <Image
-                  src={modalData.sprites.front_default}
-                  alt={modalData.name}
-                  className="mb-2"
-                  width={96}
-                  height={96}
-                  unoptimized
-                />
-                <div>
-                  <strong>Height:</strong> {modalData.height}
-                </div>
-                <div>
-                  <strong>Weight:</strong> {modalData.weight}
-                </div>
-                <div>
-                  <strong>Types:</strong>{' '}
-                  {modalData.types
-                    .map((t: PokemonType) => t.type.name)
-                    .join(', ')}
-                </div>
-              </div>
-            ) : (
-              <div>Not found.</div>
-            )}
+      <Modal
+        open={modalOpen}
+        title={modalTitle}
+        onCancel={() => setModalOpen(false)}
+      >
+        {loading ? (
+          <div>Loading...</div>
+        ) : modalData ? (
+          <div className="flex flex-col items-center text-center p-4">
+            {/* Avatar */}
+            <Image
+              src={modalData.sprites.front_default}
+              alt={modalData.name}
+              width={80}
+              height={80}
+              className="rounded-full border-2 border-gray-200 mb-2"
+              unoptimized
+            />
+            {/* Stars as base experience */}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-yellow-400 text-xl">
+                {'★'.repeat(getStars(modalData.base_experience))}
+                {'☆'.repeat(5 - getStars(modalData.base_experience))}
+              </span>
+            </div>
+            {/* Tag */}
+            <div className="text-xs text-gray-500 font-semibold mb-2">
+              #{modalData.id} &nbsp;|&nbsp;{' '}
+              {modalData.types.map((t: PokemonType) => t.type.name).join(' / ')}
+            </div>
+            {/* Introduction */}
+            <div className="text-gray-700 text-sm italic mb-2">
+              {`This Pokémon is a ${modalData.types
+                .map((t: PokemonType) => t.type.name)
+                .join('/')} type. 
+              It has base experience ${modalData.base_experience}, height ${
+                modalData.height
+              }, and weight ${modalData.weight}.`}
+            </div>
+            {/* Abilities */}
+            <div className="text-xs text-gray-500">
+              Abilities:{' '}
+              {modalData.abilities
+                ?.map((a: { ability: { name: string } }) => a.ability.name)
+                .join(', ')}
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div>Not found.</div>
+        )}
+      </Modal>
     </div>
   )
 }

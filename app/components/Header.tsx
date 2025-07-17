@@ -10,7 +10,7 @@ export default function Header() {
         width={80}
         height={40}
         priority
-        style={{ height: 'auto' }}
+        style={{ width: 'auto', height: 'auto' }}
       />
       <h1 className="text-white text-2xl font-bold tracking-wide">
         Pokemon List

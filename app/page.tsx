@@ -1,60 +1,28 @@
-export const dynamic = 'force-dynamic'
+import PokemonPage from './components/PokemonPage'
 
-import PokemonTable from './components/PokemonTable'
-
-type SearchParams = {
-  page?: string
-  name?: string
-}
-
-export default async function Page({
+export default async function Home({
   searchParams,
 }: {
-  searchParams?: SearchParams
+  searchParams?: { page?: string }
 }) {
-  const params = await searchParams
   const pageSize = 20
-  const page = Number(params?.page ?? '1')
-  const name = params?.name?.toString().trim().toLowerCase() ?? ''
+  const page = Number(searchParams?.page ?? '1')
+  const offset = (page - 1) * pageSize
 
-  let pokemons: { name: string; url: string }[] = []
-  let count = 0
-
-  if (name) {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
-      cache: 'no-store',
-    })
-    if (res.ok) {
-      const data = await res.json()
-      pokemons = [
-        {
-          name: data.name,
-          url: `https://pokeapi.co/api/v2/pokemon/${data.name}`,
-        },
-      ]
-      count = 1
-    }
-  } else {
-    const offset = (page - 1) * pageSize
-    const res = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?limit=${pageSize}&offset=${offset}`,
-      { cache: 'no-store' },
-    )
-    if (res.ok) {
-      const data = await res.json()
-      pokemons = data.results
-      count = data.count
-    }
-  }
+  // SSR fetch paginated list
+  const res = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=${pageSize}&offset=${offset}`,
+    { cache: 'no-store' },
+  )
+  const data = await res.json()
 
   return (
     <div className="max-w-3xl mx-auto p-8">
-      <PokemonTable
-        pokemons={pokemons}
+      <PokemonPage
+        initialPokemons={data.results}
         page={page}
         pageSize={pageSize}
-        total={count}
-        filterName={name}
+        total={data.count}
       />
     </div>
   )
