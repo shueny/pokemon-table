@@ -133,3 +133,58 @@ public/            # Static assets (e.g., pokemon.webp logo)
 ## Contributing
 
 Pull requests and issues are welcome! Please open an issue to discuss your idea before submitting a PR.
+
+---
+
+## Troubleshooting: Next.js 15 `searchParams` Error (Resolved)
+
+### Problem
+
+In **Next.js 15**, accessing dynamic route APIs like `searchParams`, `params`, `cookies()`, and `headers()` must be awaited because they are now asynchronous. If you try to access `searchParams` synchronously in a server component (such as `app/page.tsx`), you will see an error like:
+
+```
+Error: Route "/" used `searchParams.page`. `searchParams` should be awaited before using its properties.
+```
+
+This error only occurs if you extend the app to support pagination or other query parameters using `searchParams` in a server component.
+
+### Solution (Current Project)
+
+This project uses a **middleware** to inject the current request URL into a custom header (`x-url`). The page component then reads the `page` query parameter from this header using the async `headers()` API. This approach is fully compatible with Next.js 15 and avoids the `searchParams` error.
+
+#### How it works
+
+1. **Middleware (`middleware.ts`)**
+
+   ```ts
+   import { NextRequest, NextResponse } from 'next/server'
+
+   export function middleware(request: NextRequest) {
+     const response = NextResponse.next()
+     response.headers.set('x-url', request.url)
+     return response
+   }
+
+   export const config = {
+     matcher: '/',
+   }
+   ```
+
+2. **Page (`app/page.tsx`)**
+
+   ```ts
+   import { headers } from 'next/headers'
+   import PokemonPage from './components/PokemonPage'
+
+   export default async function Home() {
+     const headersList = await headers()
+     const url = headersList.get('x-url') || ''
+     const pageFromQuery = new URL(url, 'http://localhost').searchParams.get(
+       'page',
+     )
+     const page = Number(pageFromQuery) || 1
+     // ...
+   }
+   ```
+
+This pattern ensures SSR pagination works and is future-proof for Next.js updates.

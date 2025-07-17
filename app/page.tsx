@@ -1,12 +1,14 @@
+import { headers } from 'next/headers'
 import PokemonPage from './components/PokemonPage'
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams?: { page?: string }
-}) {
+export default async function Home() {
+  const headersList = await headers()
+  const url = headersList.get('x-url') || ''
+  const pageFromQuery = new URL(url, 'http://localhost').searchParams.get(
+    'page',
+  )
+  const page = Number(pageFromQuery) || 1
   const pageSize = 20
-  const page = Number(searchParams?.page ?? '1')
   const offset = (page - 1) * pageSize
 
   // SSR fetch paginated list
